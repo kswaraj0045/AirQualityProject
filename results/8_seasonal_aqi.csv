@@ -1,0 +1,5 @@
+season,total_records,avg_aqi,min_aqi,max_aqi
+Winter,73365,169.25,8,500
+Post-Monsoon,54920,154.11,9,500
+Summer,71807,123.05,9,500
+Monsoon,99882,76.98,3,500

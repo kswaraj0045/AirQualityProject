@@ -1,0 +1,107 @@
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    restart: always
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=bda_cluster
+    env_file:
+      - ./hadoop.env
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9870/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - bda_network
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    restart: always
+    ports:
+      - "9864:9864"
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+    env_file:
+      - ./hadoop.env
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    depends_on:
+      - namenode
+    networks:
+      - bda_network
+
+  hive-metastore-postgresql:
+    image: postgres:15
+    container_name: hive-metastore-postgresql
+    restart: always
+    volumes:
+      - hive_metastore_postgresql:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=metastore
+      - POSTGRES_USER=hive
+      - POSTGRES_PASSWORD=hive
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "5432:5432"
+    networks:
+      - bda_network
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore
+    restart: always
+    command: /opt/hive/bin/hive --service metastore
+    ports:
+      - "9083:9083"
+    volumes:
+      - ./configuration/hive-metastore-site.xml:/opt/hive/conf/hive-site.xml
+    env_file:
+      - ./hadoop.env
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870 datanode:9864 hive-metastore-postgresql:5432"
+    depends_on:
+      - namenode
+      - datanode
+      - hive-metastore-postgresql
+    networks:
+      - bda_network
+
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-server
+    restart: always
+    command: /opt/hive/bin/hiveserver2
+    ports:
+      - "10000:10000"
+      - "10002:10002"
+    volumes:
+      - ./configuration/hive-site.xml:/opt/hive/conf/hive-site.xml
+    env_file:
+      - ./hadoop.env
+    environment:
+      SERVICE_PRECONDITION: "hive-metastore:9083"
+    depends_on:
+      - hive-metastore
+    networks:
+      - bda_network
+
+networks:
+  bda_network:
+    name: bda_network
+    driver: bridge
+
+volumes:
+  hadoop_namenode:
+    name: hadoop_namenode
+  hadoop_datanode:
+    name: hadoop_datanode
+  hive_metastore_postgresql:
+    name: hive_metastore_postgresql

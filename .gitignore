@@ -1,0 +1,33 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Temporary files & OS artifacts
+~$*
+*.tmp
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Chrome temporary sessions
+chrome_shot/
+chrome_cdp/
+chrome_cdp_city/
+screenshot.png
+
+# Streamlit local state
+.streamlit/
+
+# Duplicate raw file at root (canonical copy preserved in dataset/raw/)
+/India_AQI_Bulletins_Master.csv
