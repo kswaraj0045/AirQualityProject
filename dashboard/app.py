@@ -273,6 +273,75 @@ THEME_CSS = """
     .sidebar-footer b {
         color: #94A3B8;
     }
+
+    /* Enforce Dark Text on Expanders & Native Widgets */
+    div[data-testid="stExpander"] {
+        background-color: #FFFFFF !important;
+        border: 1px solid #E2E8F0 !important;
+        border-radius: 10px !important;
+        margin-bottom: 0.75rem !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+    }
+    div[data-testid="stExpander"] summary {
+        background-color: #FFFFFF !important;
+        border-radius: 10px !important;
+    }
+    div[data-testid="stExpander"] summary:hover {
+        background-color: #F8FAFC !important;
+    }
+    div[data-testid="stExpander"] summary p,
+    div[data-testid="stExpander"] summary span,
+    div[data-testid="stExpander"] summary div {
+        color: #0F172A !important;
+        font-weight: 700 !important;
+        font-size: 0.92rem !important;
+    }
+    div[data-testid="stExpander"] summary svg {
+        color: #0F172A !important;
+        fill: #0F172A !important;
+    }
+    div[data-testid="stExpander"] [data-testid="stExpanderDetails"] {
+        background-color: #FFFFFF !important;
+        border-top: 1px solid #F1F5F9 !important;
+        padding: 1rem 1.25rem !important;
+    }
+    div[data-testid="stExpander"] [data-testid="stExpanderDetails"] p,
+    div[data-testid="stExpander"] [data-testid="stExpanderDetails"] span {
+        color: #334155 !important;
+    }
+
+    /* Style Standard HTML Tables */
+    table {
+        width: 100% !important;
+        background-color: #FFFFFF !important;
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+        border: 1px solid #E2E8F0 !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        margin-bottom: 1.5rem !important;
+    }
+    table th {
+        background-color: #0F172A !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 0.85rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        padding: 12px 16px !important;
+        border: none !important;
+    }
+    table td {
+        background-color: #FFFFFF !important;
+        color: #1E293B !important;
+        font-size: 0.9rem !important;
+        padding: 12px 16px !important;
+        border-top: 1px solid #F1F5F9 !important;
+        border-bottom: none !important;
+    }
+    table tr:nth-child(even) td {
+        background-color: #F8FAFC !important;
+    }
 </style>
 """
 st.markdown(THEME_CSS, unsafe_allow_html=True)
@@ -1090,7 +1159,32 @@ elif selected_page == "ℹ️ About Architecture":
         {"Component": "Catalog Database", "Service": "hive-metastore-postgresql", "Technology": "PostgreSQL 15", "Port": "5432", "Role": "Persistent relational catalog maintaining 57 metadata tables"},
         {"Component": "Analytics Frontend", "Service": "dashboard/app.py", "Technology": "Streamlit & Plotly", "Port": "8501", "Role": "Interactive SaaS UI directly bound to Hive-derived query outputs"}
     ])
-    st.table(arch_df)
+
+    arch_rows = []
+    for _, row in arch_df.iterrows():
+        arch_rows.append(f"""<tr>
+<td style="padding:12px 14px;font-weight:700;color:#0F172A;background:#FFFFFF;border-top:1px solid #E2E8F0;">{row['Component']}</td>
+<td style="padding:12px 14px;background:#FFFFFF;border-top:1px solid #E2E8F0;"><span style="background:#F1F5F9;color:#0F766E;padding:3px 8px;border-radius:6px;font-weight:600;font-family:monospace;">{row['Service']}</span></td>
+<td style="padding:12px 14px;color:#1E293B;font-weight:600;background:#FFFFFF;border-top:1px solid #E2E8F0;">{row['Technology']}</td>
+<td style="padding:12px 14px;background:#FFFFFF;border-top:1px solid #E2E8F0;"><span style="background:#EFF6FF;color:#2563EB;padding:3px 8px;border-radius:6px;font-weight:700;font-size:0.8rem;border:1px solid #DBEAFE;">{row['Port']}</span></td>
+<td style="padding:12px 14px;color:#475569;font-size:0.88rem;background:#FFFFFF;border-top:1px solid #E2E8F0;">{row['Role']}</td>
+</tr>""")
+    tbody = "\n".join(arch_rows)
+    table_html = f"""<table style="width:100%;border-collapse:separate;border-spacing:0;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:10px;overflow:hidden;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+<thead>
+<tr style="background:#0F172A;text-align:left;">
+<th style="padding:12px 14px;color:#FFFFFF;font-weight:700;font-size:0.82rem;text-transform:uppercase;border:none;">Component</th>
+<th style="padding:12px 14px;color:#FFFFFF;font-weight:700;font-size:0.82rem;text-transform:uppercase;border:none;">Service Container</th>
+<th style="padding:12px 14px;color:#FFFFFF;font-weight:700;font-size:0.82rem;text-transform:uppercase;border:none;">Technology Stack</th>
+<th style="padding:12px 14px;color:#FFFFFF;font-weight:700;font-size:0.82rem;text-transform:uppercase;border:none;">Port / Network</th>
+<th style="padding:12px 14px;color:#FFFFFF;font-weight:700;font-size:0.82rem;text-transform:uppercase;border:none;">Engineering Architectural Role</th>
+</tr>
+</thead>
+<tbody>
+{tbody}
+</tbody>
+</table>"""
+    st.markdown(table_html, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown('<div class="content-card-title">HiveQL Analytical Query Catalog (All 14 Core Queries)</div>', unsafe_allow_html=True)
